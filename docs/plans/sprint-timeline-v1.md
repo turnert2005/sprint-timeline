@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: complete
 type: plan
 scope: M
 created: 2026-11-08
@@ -32,12 +32,12 @@ The default steps match a common cadence: UAT on the Monday and Tuesday after th
 | 3 | Drawing: status line, chart, table, escaping. | Done 2026-11-08, 12 tests |
 | 4 | Which team and sprint the page shows, with a fallback to today's sprint. | Done 2026-11-08, 9 tests |
 | 5 | Step form and its checks. | Done 2026-11-08, 5 tests |
-| 6 | Tab glue: SDK, team sprints, working days, saved steps, redraw on a sprint change. | Built 2026-11-08, type-checked, not yet run in Azure DevOps |
+| 6 | Tab glue: SDK, team sprints, working days, saved steps, redraw on a sprint change. | Done 2026-11-08: run in Azure DevOps in the live looks of tasks 9 and 11 |
 | 7 | Local preview in light and dark, and the listing assets. | Done 2026-11-08 |
 | 8 | Package the .vsix. | Done 2026-11-08: 0.1.0, 107 KB, holds only the tab page, its script and styles, the images, the overview and the license |
 | 9 | Publish privately, share with the sandbox organization scottturner-dev, install, and check the tab on a real Sprints page: that it shows, which context the page passes, and that saving steps works. | Published privately on Scott's "Publish privately and test", shared with and installed in scottturner-dev only, 2026-11-08. The sandbox project's Iterations 1 to 3 now carry dates (10/26 to 12/4). Live look done 2026-11-08 in Scott's Chrome signed in as the sandbox owner: the Timeline tab shows on the new Sprints page beside Taskboard, Backlog, Capacity and Analytics; it follows the page's sprint picker (Iteration 2 to 3); it follows the dark theme; Iteration 1 on Sun 11/8 reads "UAT starts Mon 11/9" with today's line on 11/8; a saved step survives a reload. 0.1.1 fixed a Save that did nothing on its first press (`docs/live-check/`) |
 | 10 | Public listing and a public GitHub repo. | Scott chose both on 2026-11-08 after the live look. 1.0.0 public, and the repo starts from one clean commit, with sample names in place of the first organization's names |
-| 11 | Install in the first consuming organization through its admin, as Tall Text was, and check the tab there. | Asked of that organization's admin on 2026-11-08, as for Tall Text. The admin installed 1.0.0 on 2026-11-08, and the extension management API reads it as installed and enabled. Open: a look at the Timeline tab on one of its Sprints pages with the default steps |
+| 11 | Install in the first consuming organization through its admin, as Tall Text was, and check the tab there. | Asked of that organization's admin on 2026-11-08, as for Tall Text. Done 2026-11-08. The admin installed 1.0.0, and the extension management API reads it as installed and enabled. The Timeline tab shows on a team's Sprints page beside Taskboard, Backlog, Capacity and Analytics, with the default steps and no setup: development Mon 10/26 to Fri 11/6, UAT Mon 11/9 to Tue 11/10, release Wed 11/11, close-out Thu 11/12, and today's line on Sun 11/8 |
 
 ## Open questions that only a live test answers
 
@@ -55,3 +55,4 @@ The default steps match a common cadence: UAT on the Monday and Tuesday after th
 | 2026-11-08 | In 0.1.0 one Save press after "Use the default steps" did nothing, with no error, and a second press saved. The storage connection was opened outside the error handling. 0.1.1 keeps one connection, shows "Saving" on the button, blocks a second press and shows an error after 15 seconds; on 0.1.1 both test saves went through on the first press. |
 | 2026-11-08 | Open: the Microsoft documents give no shape for the context a tab receives. The tab follows the picker in the live test, so the route of the page names the sprint. |
 | 2026-11-08 | The first consuming organization installed 1.0.0. A read of its installed extensions shows version 1.0.0 with no disabled flag. |
+| 2026-11-08 | Live look in that organization: the tab reads "UAT starts Mon 11/9" for a sprint that ended Fri 11/6, which matches its cadence with the default steps. |
