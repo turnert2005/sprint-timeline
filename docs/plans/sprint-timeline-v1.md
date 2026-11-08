@@ -51,7 +51,7 @@ A step now counts its working days before or after either the sprint's first day
 | 13 | Where today falls: a step that runs during development is named with it, and a step before the sprint is named as the next thing to start. | Done 2026-11-08, 3 tests |
 | 14 | Drawing: a step that starts before development is drawn above it, in the chart and the table. | Done 2026-11-08, 2 tests; the local preview shows a whole cycle in light and dark |
 | 15 | Step form: a count, before or after, and the sprint's first or last day. | Done 2026-11-08, 3 tests |
-| 16 | Test as a private copy in the sandbox organization: a step before the sprint draws, saves and reads back. | Open |
+| 16 | Test as a private copy in the sandbox organization: a step before the sprint draws, saves and reads back. | Done 2026-11-08 in a browser signed in as the sandbox owner: the private copy 1.1.0 draws the default steps as 1.0 does; a step 3 working days before the sprint's first day, lasting 7, saved on the first press and drew Wed 11/4 to Thu 11/12 above development, with "Today is day 3 of 7 of Planning"; it read back the same after a reload |
 | 17 | Publish 1.1.0, check it in the first consuming organization, and save the cycle there for the teams Scott names. | Open |
 
 ## Open questions that only a live test answers
@@ -71,3 +71,4 @@ A step now counts its working days before or after either the sprint's first day
 | 2026-11-08 | Open: the Microsoft documents give no shape for the context a tab receives. The tab follows the picker in the live test, so the route of the page names the sprint. |
 | 2026-11-08 | The first consuming organization installed 1.0.0. A read of its installed extensions shows version 1.0.0 with no disabled flag. |
 | 2026-11-08 | Live look in that organization: the tab reads "UAT starts Mon 11/9" for a sprint that ended Fri 11/6, which matches its cadence with the default steps. |
+| 2026-11-08 | The browser that held the work account would not keep the sandbox owner's sign-in; a reload put the work account back. A second browser signed in as the sandbox owner ran the test. |
