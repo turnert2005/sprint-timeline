@@ -1,13 +1,13 @@
 # Sprint Timeline
 
 An Azure DevOps extension that adds a **Timeline** tab to the Sprints page.
-It draws the whole sprint: development, then every step the team runs after it, such as UAT, the release and the close-out, with a line for today.
+It draws the whole sprint: development and every step the team runs around it, such as planning, UAT, the release and the close-out, with a line for today.
 
 ## Status
 
-1.0.0, public on the Visual Studio Marketplace since 2026-11-08, after a live check in a sandbox organization.
+1.1.0, public on the Visual Studio Marketplace since 2026-11-08, after a live check in a sandbox organization.
 Install it from the Marketplace listing "Sprint Timeline" by Scott Turner.
-See `docs/plans/sprint-timeline-v1.md` for the plan and what is still open.
+See `docs/plans-completed/sprint-timeline-v1.md` for the plan, its tests and what is still open.
 
 ## How it works
 
@@ -39,3 +39,17 @@ npm run package    # tests, build, then a .vsix in out/
 ## Provenance
 
 An independent implementation by Scott Turner, MIT license.
+
+## Features
+
+- A Timeline tab on the Sprints page that follows the page's sprint picker and the Azure DevOps theme.
+- One bar for development, one for each team step and one for the next sprint, with a line for today and a sentence that says where today falls.
+- Team steps that start before or after the sprint's first or last day, saved once per team, such as planning before the sprint and a retrospective after the release.
+- A table of the same dates, for a screen reader and for copying.
+
+## Version History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| 1.1.0 | 2026-11-08 | A step can start before the sprint or inside it, so a team can draw planning above development. |
+| 1.0.0 | 2026-11-08 | First public release: the Timeline tab with development, the team's steps after it and the next sprint. |

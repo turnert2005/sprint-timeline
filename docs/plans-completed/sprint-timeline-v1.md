@@ -1,10 +1,43 @@
 ---
-status: complete
+status: completed
 type: plan
 scope: M
 created: 2026-11-08
+completedDate: 2026-11-08
 lastUpdated: 2026-11-08
 owner: Scott Turner
+---
+
+## Implementation Summary
+
+> **Status:** Completed
+> **Completed:** 2026-11-08
+> **Verified By:** Scott's confirmation after an audit: every file present, the type check clean, 57 tests passing, and live looks in the sandbox and the first consuming organization.
+
+### Completed Features
+
+| Component | Status | Notes |
+| --- | --- | --- |
+| Timeline tab on the Sprints page | Done | It shows beside Taskboard, Backlog, Capacity and Analytics, and follows the sprint picker and the theme. |
+| Steps after development | Done | 1.0.0: UAT, the release and the close-out by default, saved once per team. |
+| Steps before and inside the sprint | Done | 1.1.0: a step counts from the sprint's first or last day, before or after it, so planning draws above development. |
+| Public listing | Done | 1.0.0 and 1.1.0 public on the Visual Studio Marketplace, both validated. |
+| First consuming organization | Done | Installed by its admin, updated to 1.1.0 on its own, and its own cycle saved for four teams. |
+
+### Files Created
+
+- `src/model.ts`, `src/render.ts`, `src/editor.ts`, `src/context.ts`, `src/tab.ts`, `src/preview.ts`
+- `static/tab.html`, `static/styles.css`, `static/preview.html`
+- `test/model.test.ts`, `test/render.test.ts`, `test/editor.test.ts`, `test/context.test.ts`
+- `scripts/publish.mjs`, `scripts/preview-shot.mjs`
+- `vss-extension.json`, `overview.md`, `LICENSE`, `images/`
+
+### Files Modified in 1.1.0
+
+- `src/model.ts`, `src/render.ts`, `src/editor.ts`, `src/preview.ts`, `static/styles.css`
+- `test/model.test.ts`, `test/render.test.ts`, `test/editor.test.ts`
+- `scripts/preview-shot.mjs`, `overview.md`, `README.md`, `vss-extension.json`, `package.json`, `images/screenshot-editor-dark.png`, `images/screenshot-cycle-light.png`
+
 ---
 
 # Plan: Sprint Timeline v1
@@ -72,3 +105,4 @@ A step now counts its working days before or after either the sprint's first day
 | 2026-11-08 | The first consuming organization installed 1.0.0. A read of its installed extensions shows version 1.0.0 with no disabled flag. |
 | 2026-11-08 | Live look in that organization: the tab reads "UAT starts Mon 11/9" for a sprint that ended Fri 11/6, which matches its cadence with the default steps. |
 | 2026-11-08 | The browser that held the work account would not keep the sandbox owner's sign-in; a reload put the work account back. A second browser signed in as the sandbox owner ran the test. |
+| 2026-11-08 | Open, not built: the tab counts the team's working days of the week and does not read the team's days off, so a holiday inside a step, such as a Thursday close-out on Thanksgiving, still counts as a working day. |
