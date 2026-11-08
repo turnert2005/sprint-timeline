@@ -1,0 +1,213 @@
+/* Sprint Timeline. Text and background come from the theme variables Azure DevOps injects, so the
+   tab matches light and dark. The bar colors are fixed, chosen to read on both. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding: 12px 16px 16px;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  background-color: var(--background-color, #fff);
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+}
+
+.st-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.st-bar-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.st-grow {
+  flex: 1;
+}
+
+.st-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.st-status {
+  margin: 4px 0 12px;
+  font-size: 15px;
+}
+
+.st-help {
+  margin: 4px 0 12px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+.st-scroll {
+  overflow-x: auto;
+  padding-bottom: 4px;
+  border: 1px solid rgba(var(--palette-neutral-8, 234, 234, 234), 1);
+  border-radius: 4px;
+}
+
+.st-chart {
+  display: block;
+}
+
+.st-chart text {
+  fill: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+  font-family: inherit;
+}
+
+.st-chart .st-axis {
+  font-size: 11px;
+  fill: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+.st-chart .st-lane {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.st-chart .st-sub {
+  font-size: 11px;
+  fill: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+.st-chart .st-more {
+  fill: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.st-off {
+  fill: rgba(var(--palette-neutral-4, 244, 244, 244), 1);
+}
+
+.st-rule,
+.st-grid {
+  stroke: rgba(var(--palette-neutral-8, 234, 234, 234), 1);
+  stroke-width: 1;
+}
+
+.st-today {
+  stroke: #D13438;
+  stroke-width: 2;
+}
+
+.st-today-dot {
+  fill: #D13438;
+}
+
+.st-table {
+  margin-top: 16px;
+  border-collapse: collapse;
+  min-width: 420px;
+}
+
+.st-table th,
+.st-table td {
+  text-align: left;
+  padding: 6px 16px 6px 0;
+  border-bottom: 1px solid rgba(var(--palette-neutral-8, 234, 234, 234), 1);
+}
+
+.st-table thead th {
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.st-button,
+.st-link {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.st-button {
+  padding: 5px 12px;
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+  background: rgba(var(--palette-neutral-4, 244, 244, 244), 1);
+  border: 1px solid rgba(var(--palette-neutral-20, 200, 200, 200), 1);
+}
+
+.st-primary {
+  color: #fff;
+  background: var(--communication-background, #0078D4);
+  border-color: var(--communication-background, #0078D4);
+}
+
+.st-link {
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--communication-foreground, #0078D4);
+}
+
+.st-link[disabled] {
+  color: var(--text-disabled-color, rgba(0, 0, 0, 0.38));
+  cursor: default;
+}
+
+.st-button:focus-visible,
+.st-link:focus-visible,
+.st-editor input:focus-visible,
+.st-editor select:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078D4);
+  outline-offset: 1px;
+}
+
+.st-editor .st-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--palette-neutral-8, 234, 234, 234), 1);
+  border-radius: 4px;
+}
+
+.st-editor label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.st-editor input,
+.st-editor select {
+  font: inherit;
+  padding: 4px 6px;
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+  background: var(--background-color, #fff);
+  border: 1px solid rgba(var(--palette-neutral-20, 200, 200, 200), 1);
+  border-radius: 2px;
+}
+
+.st-editor input[type="number"] {
+  width: 56px;
+}
+
+.st-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.st-errors {
+  margin: 0 0 12px;
+  padding: 8px 12px 8px 28px;
+  color: #A4262C;
+  background: rgba(209, 52, 56, 0.08);
+  border-radius: 4px;
+}

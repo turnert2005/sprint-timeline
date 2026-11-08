@@ -1,0 +1,28 @@
+{
+  "name": "sprint-timeline",
+  "version": "1.0.0",
+  "description": "See the whole sprint in Azure DevOps: development and every step your team runs after it, on a Timeline tab of the Sprints page.",
+  "author": "Scott Turner",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/tab.ts --bundle --outfile=dist/tab.js --format=iife --sourcemap && esbuild src/preview.ts --bundle --outfile=dist/preview.js --format=iife",
+    "build:ship": "esbuild src/tab.ts --bundle --outfile=dist/tab.js --format=iife --minify && node -e \"require('fs').rmSync('dist/tab.js.map',{force:true})\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "npm run build && node scripts/preview-shot.mjs",
+    "package": "npm run typecheck && npm test && npm run build:ship && tfx extension create --manifest-globs vss-extension.json --output-path out",
+    "publish:dev": "npm run typecheck && npm test && npm run build:ship && node scripts/publish.mjs"
+  },
+  "dependencies": {
+    "azure-devops-extension-api": "^5.280.1",
+    "azure-devops-extension-sdk": "^4.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "playwright": "^1.63.0",
+    "tfx-cli": "^0.23.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

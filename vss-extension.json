@@ -1,0 +1,46 @@
+{
+  "manifestVersion": 1,
+  "id": "sprint-timeline",
+  "publisher": "scott-turner",
+  "version": "1.0.0",
+  "name": "Sprint Timeline",
+  "description": "See the whole sprint: development and every step your team runs after it, such as UAT, the release and the close-out, on a Timeline tab of the Sprints page.",
+  "categories": ["Azure Boards"],
+  "targets": [{ "id": "Microsoft.VisualStudio.Services" }],
+  "scopes": ["vso.work"],
+  "galleryFlags": ["Public"],
+  "tags": ["sprint", "timeline", "iteration", "UAT", "release", "cadence", "gantt"],
+  "icons": { "default": "images/icon.png" },
+  "branding": { "color": "#1F2933", "theme": "dark" },
+  "content": {
+    "details": { "path": "overview.md" },
+    "license": { "path": "LICENSE" }
+  },
+  "links": {
+    "support": { "uri": "https://github.com/turnert2005/sprint-timeline/issues" }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/turnert2005/sprint-timeline"
+  },
+  "files": [
+    { "path": "static/tab.html", "addressable": true },
+    { "path": "static/styles.css", "addressable": true },
+    { "path": "dist/tab.js", "addressable": true },
+    { "path": "images", "addressable": true }
+  ],
+  "contributions": [
+    {
+      "id": "sprint-timeline-tab",
+      "type": "ms.vss-web.tab",
+      "description": "A Timeline tab on the Sprints page.",
+      "targets": ["ms.vss-work-web.iteration-backlog-tabs"],
+      "properties": {
+        "name": "Timeline",
+        "title": "Timeline",
+        "uri": "static/tab.html",
+        "registeredObjectId": "sprint-timeline-tab"
+      }
+    }
+  ]
+}

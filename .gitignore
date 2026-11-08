@@ -1,0 +1,10 @@
+node_modules/
+dist/
+out/
+*.vsix
+.DS_Store
+
+# Environment (secrets, never committed)
+.env
+.env.local
+.env*.local
