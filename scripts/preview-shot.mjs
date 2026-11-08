@@ -1,5 +1,6 @@
 // Takes screenshots of static/preview.html in a headless browser: the timeline on a UAT day, the
-// timeline on a development day, and the step form. They go to out/preview/, and the Marketplace
+// timeline on a development day, the step form, and a whole cycle with planning before the sprint
+// and its form. They go to out/preview/, and the Marketplace
 // screenshots in images/ are copied from them by hand.
 //
 //   npm run preview
@@ -17,6 +18,8 @@ const shots = [
   { name: "uat-day", query: "?today=2026-11-24" },
   { name: "development-day", query: "?today=2026-11-13" },
   { name: "editor", query: "?show=editor" },
+  { name: "cycle-planning-day", query: "?steps=cycle&today=2026-11-10" },
+  { name: "cycle-editor", query: "?steps=cycle&show=editor" },
 ]
 
 // The installed Google Chrome, headless with a profile of its own, so no browser download is needed.

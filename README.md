@@ -20,7 +20,9 @@ See `docs/plans/sprint-timeline-v1.md` for the plan and what is still open.
 | Tab | `src/tab.ts` | Connects the parts to Azure DevOps: sprints, working days, saved steps. |
 
 Each step is stored once per team in the extension's own data storage, as `{ version: 1, steps: [...] }`.
-A step starts a number of working days after the sprint's last day, where 0 is the last day itself, and lasts a number of working days.
+A step starts a number of working days from the sprint's last day, or from its first day when the step has `from: "start"`.
+0 is that day itself, a positive number counts forward, and a negative number counts back. A step lasts a number of working days.
+A step with no `from` counts from the last day, so a document saved by 1.0 reads the same in 1.1.
 
 ## Local build
 

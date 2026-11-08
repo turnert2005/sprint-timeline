@@ -10,6 +10,11 @@ const MON_FRI: Weekday[] = [1, 2, 3, 4, 5]
 const S22: SprintInput = { id: "22", name: "Sprint 22", start: "2026-11-09", finish: "2026-11-20" }
 const S23: SprintInput = { id: "23", name: "Sprint 23", start: "2026-11-23", finish: "2026-12-04" }
 const T22 = sprintTimeline(S22, DEFAULT_CADENCE, MON_FRI)
+const CYCLE22 = sprintTimeline(S22, { version: 1, steps: [
+  ...DEFAULT_CADENCE.steps,
+  { name: "Planning", startsAfter: -3, from: "start", days: 7, color: "teal" },
+  { name: "Retrospective", startsAfter: 5, days: 1, color: "gray" },
+] }, MON_FRI)
 const view = (today: string, extra: Partial<TimelineView> = {}): TimelineView => ({ timeline: T22, next: S23, today, workingDays: MON_FRI, locale: "en-US", ...extra })
 
 describe("dates in words", () => {
@@ -34,6 +39,13 @@ describe("the status line", () => {
     expect(status("2026-11-23")).toBe("Today is day 1 of 2 of UAT for Sprint 22.")
     expect(status("2026-11-25")).toBe("Today is day 1 of 1 of Release for Sprint 22.")
     expect(status("2026-11-30")).toBe("Sprint 22 and its steps finished Thu 11/26.")
+  })
+
+  it("names planning before the sprint and beside development", () => {
+    const status = (today: string) => statusWords(CYCLE22, placeOf(CYCLE22, today, MON_FRI))
+    expect(status("2026-11-03")).toBe("Sprint 22: Planning starts Wed 11/4.")
+    expect(status("2026-11-05")).toBe("Today is day 2 of 7 of Planning for Sprint 22.")
+    expect(status("2026-11-10")).toBe("Today is working day 2 of 10 of development in Sprint 22, and day 5 of 7 of Planning.")
   })
 })
 
@@ -75,6 +87,16 @@ describe("the chart", () => {
   it("draws no next lane for the last sprint", () => {
     expect(chartSvg(view("2026-11-13", { next: null })).match(/class="st-bar"/g)).toHaveLength(4)
   })
+
+  it("starts at a planning step before the sprint and draws it above development", () => {
+    const cycle = view("2026-11-10", { timeline: CYCLE22 })
+    expect(chartRange(cycle)).toEqual({ start: "2026-11-04", end: "2026-11-30" })
+    const svg = chartSvg(cycle)
+    const lanes = [...svg.matchAll(/<text class="st-lane"[^>]*>([^<]+)<\/text>/g)].map(m => m[1])
+    expect(lanes).toEqual(["Planning", "Development", "UAT", "Release", "Close-out", "Retrospective", "Sprint 23"])
+    // Planning's bar starts on the chart's first day.
+    expect(svg).toContain(`<rect class="st-bar" x="${LAYOUT.label + 2}"`)
+  })
 })
 
 describe("escaping", () => {
@@ -94,5 +116,12 @@ describe("the table", () => {
     expect(table).toContain('<th scope="row">Development</th><td>Mon 11/9 to Fri 11/20</td><td>10</td>')
     expect(table).toContain('<th scope="row">UAT</th><td>Mon 11/23 to Tue 11/24</td><td>2</td>')
     expect(table).toContain('<th scope="row">Close-out</th><td>Thu 11/26</td><td>1</td>')
+  })
+
+  it("lists a step before the sprint first, in the chart's order", () => {
+    const table = datesTable(view("2026-11-10", { timeline: CYCLE22 }))
+    const rows = [...table.matchAll(/<th scope="row">([^<]+)<\/th>/g)].map(m => m[1])
+    expect(rows).toEqual(["Planning", "Development", "UAT", "Release", "Close-out", "Retrospective"])
+    expect(table).toContain('<th scope="row">Planning</th><td>Wed 11/4 to Thu 11/12</td><td>7</td>')
   })
 })

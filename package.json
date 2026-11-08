@@ -1,7 +1,7 @@
 {
   "name": "sprint-timeline",
-  "version": "1.0.0",
-  "description": "See the whole sprint in Azure DevOps: development and every step your team runs after it, on a Timeline tab of the Sprints page.",
+  "version": "1.1.0",
+  "description": "See the whole sprint in Azure DevOps: development and every step your team runs around it, on a Timeline tab of the Sprints page.",
   "author": "Scott Turner",
   "license": "MIT",
   "private": true,

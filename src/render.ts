@@ -1,11 +1,12 @@
 // Sprint Timeline: the drawing. It turns a sprint's timeline into the HTML of the tab: a status
 // line, a chart with one lane for development, one lane for each step and one for the next sprint,
-// a line for today, and a table of the same dates for a screen reader.
+// a line for today, and a table of the same dates for a screen reader. A step that starts before
+// development is drawn above it, and every other step below it, each in the team's order.
 //
 // Pure: it returns a string, and every text from Azure DevOps or from a team is escaped.
 
 import {
-  addDays, isWorkingDay, placeOf, workingDaysIn, type DayPlace, type SprintInput, type SprintTimeline, type StepColor, type Weekday, type Ymd,
+  addDays, isWorkingDay, placeOf, workingDaysIn, type DayPlace, type SprintInput, type SprintTimeline, type StepColor, type StepPlace, type Weekday, type Ymd,
 } from "./model"
 
 export interface TimelineView {
@@ -55,13 +56,18 @@ const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? "" 
 /** The status line: where today falls, in one sentence. */
 export function statusWords(timeline: SprintTimeline, place: DayPlace, locale = "en-US"): string {
   const name = timeline.sprint.name
+  const stepDays = (steps: readonly StepPlace[]): string => steps.map(s => `day ${s.day} of ${s.of} of ${s.name}`).join(", and ")
   switch (place.kind) {
-    case "before":
-      return `${name} starts ${shortDay(timeline.development.start, locale)}.`
-    case "development":
-      return `Today is working day ${place.day} of ${place.of} of development in ${name}.`
+    case "before": {
+      const next = place.next === null ? undefined : timeline.steps.find(s => s.name === place.next)
+      return next ? `${name}: ${next.name} starts ${shortDay(next.start, locale)}.` : `${name} starts ${shortDay(timeline.development.start, locale)}.`
+    }
+    case "development": {
+      const also = place.steps.length > 0 ? `, and ${stepDays(place.steps)}` : ""
+      return `Today is working day ${place.day} of ${place.of} of development in ${name}${also}.`
+    }
     case "steps":
-      return `Today is ${place.steps.map(s => `day ${s.day} of ${s.of} of ${s.name}`).join(", and ")} for ${name}.`
+      return `Today is ${stepDays(place.steps)} for ${name}.`
     case "between": {
       const next = timeline.steps.find(s => s.name === place.next)
       return next ? `${name}: ${next.name} starts ${shortDay(next.start, locale)}.` : `${name} is between steps.`
@@ -81,25 +87,30 @@ interface Lane {
   open: boolean
 }
 
-/** The first and last day the chart shows: the sprint's start to a few days past its last step or the next sprint's start. */
+/** The first and last day the chart shows: the first bar's start to a few days past its last step or the next sprint's start. */
 export function chartRange(view: TimelineView): { start: Ymd; end: Ymd } {
   const t = view.timeline
   const reach = view.next && view.next.start > t.end ? view.next.start : t.end
-  return { start: t.development.start, end: addDays(reach, LAYOUT.tail) }
+  return { start: t.start, end: addDays(reach, LAYOUT.tail) }
+}
+
+/** Development and the steps in drawing order: steps that start before development, development, then the rest. */
+export function rowsInOrder(t: SprintTimeline): Array<{ name: string; start: Ymd; end: Ymd; fill: string }> {
+  const step = (s: SprintTimeline["steps"][number]) => ({ name: s.name, start: s.start, end: s.end, fill: COLOR_FILL[s.color] })
+  return [
+    ...t.steps.filter(s => s.start < t.development.start).map(step),
+    { name: "Development", start: t.development.start, end: t.development.end, fill: COLOR_FILL.development },
+    ...t.steps.filter(s => s.start >= t.development.start).map(step),
+  ]
 }
 
 function lanes(view: TimelineView, range: { end: Ymd }): Lane[] {
-  const t = view.timeline
   const locale = view.locale
-  const dev = workingDaysIn(t.development, view.workingDays).length
-  const out: Lane[] = [
-    { label: "Development", sub: `${spanWords(t.development.start, t.development.end, locale)}, ${plural(dev, "working day")}`, start: t.development.start, end: t.development.end, fill: COLOR_FILL.development, open: false },
-    ...t.steps.map(s => ({
-      label: s.name,
-      sub: `${spanWords(s.start, s.end, locale)}, ${plural(workingDaysIn(s, view.workingDays).length, "working day")}`,
-      start: s.start, end: s.end, fill: COLOR_FILL[s.color], open: false,
-    })),
-  ]
+  const out: Lane[] = rowsInOrder(view.timeline).map(r => ({
+    label: r.name,
+    sub: `${spanWords(r.start, r.end, locale)}, ${plural(workingDaysIn(r, view.workingDays).length, "working day")}`,
+    start: r.start, end: r.end, fill: r.fill, open: false,
+  }))
   if (view.next) {
     const end = view.next.finish < range.end ? view.next.finish : range.end
     out.push({ label: view.next.name, sub: `Starts ${shortDay(view.next.start, locale)}`, start: view.next.start, end, fill: COLOR_FILL.next, open: view.next.finish > range.end })
@@ -159,10 +170,8 @@ export function chartSvg(view: TimelineView): string {
 export function datesTable(view: TimelineView): string {
   const t = view.timeline
   const locale = view.locale
-  const rows = [
-    { name: "Development", start: t.development.start, end: t.development.end },
-    ...t.steps.map(s => ({ name: s.name, start: s.start, end: s.end })),
-  ].map(r => `<tr><th scope="row">${escapeHtml(r.name)}</th><td>${escapeHtml(spanWords(r.start, r.end, locale))}</td><td>${workingDaysIn(r, view.workingDays).length}</td></tr>`)
+  const rows = rowsInOrder(t)
+    .map(r => `<tr><th scope="row">${escapeHtml(r.name)}</th><td>${escapeHtml(spanWords(r.start, r.end, locale))}</td><td>${workingDaysIn(r, view.workingDays).length}</td></tr>`)
   return `<table class="st-table"><caption class="st-hidden">Dates of ${escapeHtml(t.sprint.name)}</caption><thead><tr><th scope="col">Step</th><th scope="col">Dates</th><th scope="col">Working days</th></tr></thead><tbody>${rows.join("")}</tbody></table>`
 }
 

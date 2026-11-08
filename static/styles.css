@@ -177,7 +177,8 @@ body {
   border-radius: 4px;
 }
 
-.st-editor label {
+.st-editor label,
+.st-editor .st-starts {
   display: inline-flex;
   align-items: center;
   gap: 6px;

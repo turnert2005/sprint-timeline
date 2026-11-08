@@ -1,8 +1,9 @@
-// Sprint Timeline: the dates of a sprint and of the steps a team runs after it.
+// Sprint Timeline: the dates of a sprint and of the steps a team runs around it.
 //
-// An Azure DevOps iteration holds only a start date and a finish date. Many teams run steps after
-// development ends: UAT, a release, a close-out. A team names those steps once, each as a number
-// of working days after the sprint's last day, and this module turns them into dates.
+// An Azure DevOps iteration holds only a start date and a finish date. Many teams run steps around
+// development: planning before it, then UAT, a release and a close-out after it. A team names those
+// steps once, each as a number of working days before or after the sprint's first or last day,
+// and this module turns them into dates.
 //
 // Pure: no SDK, no DOM and no clock. Dates are days, "2026-11-20", read at noon UTC so no time
 // zone or daylight change moves them.
@@ -16,11 +17,19 @@ export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6
 export const STEP_COLORS = ["blue", "teal", "green", "orange", "purple", "red", "gray"] as const
 export type StepColor = (typeof STEP_COLORS)[number]
 
-/** One step a team runs after development, as the team set it. */
+/** The day a step counts from: the sprint's first day or its last day. */
+export type StepAnchor = "start" | "end"
+
+/** One step a team runs around development, as the team set it. */
 export interface StepConfig {
   name: string
-  /** Working days after the sprint's last day that the step starts: 0 is the last day itself, 1 the next working day. */
+  /**
+   * Working days from the day the step counts from to the day it starts: 0 is that day itself, 1 the
+   * next working day, and -1 the working day before it.
+   */
   startsAfter: number
+  /** The day the step counts from. A step with none counts from the sprint's last day, as in version 1.0. */
+  from?: StepAnchor
   /** Working days the step lasts, 1 or more. */
   days: number
   color: StepColor
@@ -41,7 +50,8 @@ export const DEFAULT_CADENCE: TeamCadence = {
   ],
 }
 
-export const LIMITS = { steps: 8, name: 40, startsAfter: 30, days: 30 } as const
+/** `offset` bounds a step's start both ways: 30 working days before or after the day it counts from. */
+export const LIMITS = { steps: 8, name: 40, offset: 30, days: 30 } as const
 
 /** Monday to Friday, the Azure DevOps default. */
 export const DEFAULT_WORKING_DAYS: readonly Weekday[] = [1, 2, 3, 4, 5]
@@ -68,15 +78,28 @@ export interface SprintTimeline {
   sprint: SprintInput
   development: Span
   steps: TimelineStep[]
+  /** The first day of the sprint or of any step. */
+  start: Ymd
   /** The last day of the sprint or of any step. */
   end: Ymd
 }
 
-/** Where a day falls in a timeline. */
+/** The working day of one step that a day falls on. */
+export interface StepPlace {
+  name: string
+  day: number
+  of: number
+}
+
+/**
+ * Where a day falls in a timeline. Before development, `next` names the step that starts next, or
+ * is null when development starts next. During development, `steps` names each step that runs at
+ * the same time.
+ */
 export type DayPlace =
-  | { kind: "before" }
-  | { kind: "development"; day: number; of: number }
-  | { kind: "steps"; steps: Array<{ name: string; day: number; of: number }> }
+  | { kind: "before"; next: string | null }
+  | { kind: "development"; day: number; of: number; steps: StepPlace[] }
+  | { kind: "steps"; steps: StepPlace[] }
   | { kind: "between"; next: string | null }
   | { kind: "after" }
 
@@ -103,12 +126,14 @@ export function isWorkingDay(ymd: Ymd, workingDays: readonly Weekday[]): boolean
   return workingSet(workingDays).has(weekdayOf(ymd))
 }
 
-/** The working day `count` working days after `ymd`. A count of 0 gives `ymd` itself. */
+/** The working day `count` working days after `ymd`, or before it for a negative count. A count of 0 gives `ymd` itself. */
 export function addWorkingDays(ymd: Ymd, count: number, workingDays: readonly Weekday[]): Ymd {
   const set = workingSet(workingDays)
+  const whole = Math.trunc(count)
+  const step = whole < 0 ? -1 : 1
   let day = ymd
-  for (let left = Math.max(0, Math.floor(count)); left > 0; ) {
-    day = addDays(day, 1)
+  for (let left = Math.abs(whole); left > 0; ) {
+    day = addDays(day, step)
     if (set.has(weekdayOf(day))) left -= 1
   }
   return day
@@ -122,14 +147,16 @@ export function workingDaysIn(span: Span, workingDays: readonly Weekday[]): Ymd[
   return out
 }
 
-/** The timeline of one sprint: its development, then each step at its working days. */
+/** The timeline of one sprint: its development, and each step at its working days. */
 export function sprintTimeline(sprint: SprintInput, cadence: TeamCadence, workingDays: readonly Weekday[]): SprintTimeline {
   const steps = cadence.steps.map(step => {
-    const start = addWorkingDays(sprint.finish, step.startsAfter, workingDays)
+    const anchor = step.from === "start" ? sprint.start : sprint.finish
+    const start = addWorkingDays(anchor, step.startsAfter, workingDays)
     return { name: step.name, color: step.color, start, end: addWorkingDays(start, Math.max(1, step.days) - 1, workingDays) }
   })
+  const start = [sprint.start, ...steps.map(s => s.start)].sort()[0]
   const end = [sprint.finish, ...steps.map(s => s.end)].sort().reverse()[0]
-  return { sprint, development: { start: sprint.start, end: sprint.finish }, steps, end }
+  return { sprint, development: { start: sprint.start, end: sprint.finish }, steps, start, end }
 }
 
 const placeIn = (span: Span, day: Ymd, workingDays: readonly Weekday[]): { day: number; of: number } | null => {
@@ -142,16 +169,19 @@ const placeIn = (span: Span, day: Ymd, workingDays: readonly Weekday[]): { day: 
 
 /** Where `today` falls in a timeline, with the name of the next step when it falls between two. */
 export function placeOf(timeline: SprintTimeline, today: Ymd, workingDays: readonly Weekday[]): DayPlace {
-  if (today < timeline.development.start) return { kind: "before" }
-  const dev = placeIn(timeline.development, today, workingDays)
-  if (dev) return { kind: "development", ...dev }
   const active = timeline.steps.flatMap(step => {
     const at = placeIn(step, today, workingDays)
     return at ? [{ name: step.name, ...at }] : []
   })
+  const dev = placeIn(timeline.development, today, workingDays)
+  if (dev) return { kind: "development", ...dev, steps: active }
   if (active.length > 0) return { kind: "steps", steps: active }
   if (today > timeline.end) return { kind: "after" }
   const next = timeline.steps.filter(s => s.start > today).sort((a, b) => (a.start < b.start ? -1 : 1))[0]
+  if (today < timeline.development.start) {
+    // Development starts next unless a step starts before it.
+    return { kind: "before", next: next && next.start < timeline.development.start ? next.name : null }
+  }
   return { kind: "between", next: next?.name ?? null }
 }
 
@@ -193,7 +223,8 @@ export function stepProblems(value: unknown, index: number): string[] {
   if (!step || typeof step !== "object") return [`Step ${n} is not a step.`]
   const out: string[] = []
   if (typeof step.name !== "string" || step.name.trim().length === 0 || step.name.length > LIMITS.name) out.push(`Step ${n} needs a name of 1 to ${LIMITS.name} characters.`)
-  if (!isInt(step.startsAfter, 0, LIMITS.startsAfter)) out.push(`Step ${n} must start 0 to ${LIMITS.startsAfter} working days after the sprint.`)
+  if (!isInt(step.startsAfter, -LIMITS.offset, LIMITS.offset)) out.push(`Step ${n} must start 0 to ${LIMITS.offset} working days before or after the day it counts from.`)
+  if (step.from !== undefined && step.from !== "start" && step.from !== "end") out.push(`Step ${n} counts from a day this version does not know.`)
   if (!isInt(step.days, 1, LIMITS.days)) out.push(`Step ${n} must last 1 to ${LIMITS.days} working days.`)
   if (!(STEP_COLORS as readonly unknown[]).includes(step.color)) out.push(`Step ${n} has a color this version does not know.`)
   return out

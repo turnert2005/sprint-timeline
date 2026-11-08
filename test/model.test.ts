@@ -32,6 +32,13 @@ describe("working days", () => {
     expect(addWorkingDays("2026-11-20", 1, [])).toBe("2026-11-23")
   })
 
+  it("counts back over the weekend for a negative count", () => {
+    // Monday 2026-11-09 back to Friday 11/6, then to Wednesday 11/4.
+    expect(addWorkingDays("2026-11-09", -1, MON_FRI)).toBe("2026-11-06")
+    expect(addWorkingDays("2026-11-09", -3, MON_FRI)).toBe("2026-11-04")
+    expect(addWorkingDays("2026-11-20", -2, MON_FRI)).toBe("2026-11-18")
+  })
+
   it("counts the ten working days of a two-week sprint", () => {
     expect(workingDaysIn({ start: S22.start, end: S22.finish }, MON_FRI)).toHaveLength(10)
   })
@@ -46,6 +53,7 @@ describe("the timeline of a sprint", () => {
       { name: "Release", color: "green", start: "2026-11-25", end: "2026-11-25" },
       { name: "Close-out", color: "purple", start: "2026-11-26", end: "2026-11-26" },
     ])
+    expect(t.start).toBe("2026-11-09")
     expect(t.end).toBe("2026-11-26")
   })
 
@@ -68,15 +76,50 @@ describe("the timeline of a sprint", () => {
     const t = sprintTimeline(S22, { version: 1, steps: [{ name: "Demo", startsAfter: 0, days: 1, color: "blue" }] }, MON_FRI)
     expect(t.steps[0]).toMatchObject({ start: "2026-11-20", end: "2026-11-20" })
   })
+
+  it("starts planning three working days before the sprint and runs it to the Thursday of the first week", () => {
+    const t = sprintTimeline(S22, { version: 1, steps: [{ name: "Planning", startsAfter: -3, from: "start", days: 7, color: "teal" }] }, MON_FRI)
+    expect(t.steps[0]).toMatchObject({ start: "2026-11-04", end: "2026-11-12" })
+    expect(t.start).toBe("2026-11-04")
+    expect(t.end).toBe("2026-11-20")
+  })
+
+  it("counts a step back from the sprint's last day", () => {
+    const t = sprintTimeline(S22, { version: 1, steps: [{ name: "Code freeze", startsAfter: -2, days: 3, color: "red" }] }, MON_FRI)
+    expect(t.steps[0]).toMatchObject({ start: "2026-11-18", end: "2026-11-20" })
+  })
+
+  it("counts a step forward from the sprint's first day", () => {
+    const t = sprintTimeline(S22, { version: 1, steps: [{ name: "Kickoff", startsAfter: 0, from: "start", days: 1, color: "blue" }] }, MON_FRI)
+    expect(t.steps[0]).toMatchObject({ start: "2026-11-09", end: "2026-11-09" })
+  })
 })
 
 describe("where today falls", () => {
   const t = sprintTimeline(S22, DEFAULT_CADENCE, MON_FRI)
 
   it("names the working day of development", () => {
-    expect(placeOf(t, "2026-11-08", MON_FRI)).toEqual({ kind: "before" })
-    expect(placeOf(t, "2026-11-13", MON_FRI)).toEqual({ kind: "development", day: 5, of: 10 })
-    expect(placeOf(t, "2026-11-20", MON_FRI)).toEqual({ kind: "development", day: 10, of: 10 })
+    expect(placeOf(t, "2026-11-08", MON_FRI)).toEqual({ kind: "before", next: null })
+    expect(placeOf(t, "2026-11-13", MON_FRI)).toEqual({ kind: "development", day: 5, of: 10, steps: [] })
+    expect(placeOf(t, "2026-11-20", MON_FRI)).toEqual({ kind: "development", day: 10, of: 10, steps: [] })
+  })
+
+  it("names planning before the sprint, and with development during it", () => {
+    const cycle = sprintTimeline(S22, { version: 1, steps: [
+      { name: "Planning", startsAfter: -3, from: "start", days: 7, color: "teal" },
+      ...DEFAULT_CADENCE.steps,
+    ] }, MON_FRI)
+    expect(placeOf(cycle, "2026-11-03", MON_FRI)).toEqual({ kind: "before", next: "Planning" })
+    expect(placeOf(cycle, "2026-11-04", MON_FRI)).toEqual({ kind: "steps", steps: [{ name: "Planning", day: 1, of: 7 }] })
+    expect(placeOf(cycle, "2026-11-08", MON_FRI)).toEqual({ kind: "steps", steps: [{ name: "Planning", day: 3, of: 7 }] })
+    expect(placeOf(cycle, "2026-11-12", MON_FRI)).toEqual({ kind: "development", day: 4, of: 10, steps: [{ name: "Planning", day: 7, of: 7 }] })
+    expect(placeOf(cycle, "2026-11-13", MON_FRI)).toEqual({ kind: "development", day: 5, of: 10, steps: [] })
+  })
+
+  it("names development as next when a step before the sprint has ended", () => {
+    const early = sprintTimeline(S22, { version: 1, steps: [{ name: "Prep", startsAfter: -5, from: "start", days: 2, color: "teal" }] }, MON_FRI)
+    // Prep is Mon 11/2 and Tue 11/3, and development starts Mon 11/9.
+    expect(placeOf(early, "2026-11-05", MON_FRI)).toEqual({ kind: "before", next: null })
   })
 
   it("names the step on its days, and the next step over a weekend between", () => {
@@ -122,14 +165,20 @@ describe("reading saved steps", () => {
   })
 
   it("refuses broken saved steps with a reason for each, and shows the default", () => {
-    const { cadence, problems } = readCadence({ version: 1, steps: [{ name: "", startsAfter: -1, days: 0, color: "pink" }] })
+    const { cadence, problems } = readCadence({ version: 1, steps: [{ name: "", startsAfter: -31, from: "middle", days: 0, color: "pink" }] })
     expect(cadence).toBe(DEFAULT_CADENCE)
     expect(problems).toEqual([
       "Step 1 needs a name of 1 to 40 characters.",
-      "Step 1 must start 0 to 30 working days after the sprint.",
+      "Step 1 must start 0 to 30 working days before or after the day it counts from.",
+      "Step 1 counts from a day this version does not know.",
       "Step 1 must last 1 to 30 working days.",
       "Step 1 has a color this version does not know.",
     ])
+  })
+
+  it("reads a step that counts back from the sprint's first day", () => {
+    const saved = { version: 1, steps: [{ name: "Planning", startsAfter: -3, from: "start", days: 7, color: "teal" }] }
+    expect(readCadence(saved)).toEqual({ cadence: saved, problems: [] })
   })
 
   it("refuses a version it does not know and too many steps", () => {

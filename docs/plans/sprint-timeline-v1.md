@@ -1,5 +1,5 @@
 ---
-status: complete
+status: in-progress
 type: plan
 scope: M
 created: 2026-11-08
@@ -38,6 +38,21 @@ The default steps match a common cadence: UAT on the Monday and Tuesday after th
 | 9 | Publish privately, share with the sandbox organization scottturner-dev, install, and check the tab on a real Sprints page: that it shows, which context the page passes, and that saving steps works. | Published privately on Scott's "Publish privately and test", shared with and installed in scottturner-dev only, 2026-11-08. The sandbox project's Iterations 1 to 3 now carry dates (10/26 to 12/4). Live look done 2026-11-08 in Scott's Chrome signed in as the sandbox owner: the Timeline tab shows on the new Sprints page beside Taskboard, Backlog, Capacity and Analytics; it follows the page's sprint picker (Iteration 2 to 3); it follows the dark theme; Iteration 1 on Sun 11/8 reads "UAT starts Mon 11/9" with today's line on 11/8; a saved step survives a reload. 0.1.1 fixed a Save that did nothing on its first press (`docs/live-check/`) |
 | 10 | Public listing and a public GitHub repo. | Scott chose both on 2026-11-08 after the live look. 1.0.0 public, and the repo starts from one clean commit, with sample names in place of the first organization's names |
 | 11 | Install in the first consuming organization through its admin, as Tall Text was, and check the tab there. | Asked of that organization's admin on 2026-11-08, as for Tall Text. Done 2026-11-08. The admin installed 1.0.0, and the extension management API reads it as installed and enabled. The Timeline tab shows on a team's Sprints page beside Taskboard, Backlog, Capacity and Analytics, with the default steps and no setup: development Mon 10/26 to Fri 11/6, UAT Mon 11/9 to Tue 11/10, release Wed 11/11, close-out Thu 11/12, and today's line on Sun 11/8 |
+
+## Version 1.1: steps before and inside the sprint
+
+Scott asked on 2026-11-08 that the tab match the five stages of the first organization's own sprint cycle page: planning, execution, closeout, release notes and retrospective. Planning opens before the sprint starts and locks on the Thursday of its first week, so a step that counts only from the sprint's last day cannot draw it. He chose to build it the same day.
+
+A step now counts its working days before or after either the sprint's first day or its last day. A saved step with no starting point counts from the last day, as in 1.0, so every saved document of 1.0 reads the same. The default steps do not change.
+
+| # | Task | State |
+| --- | --- | --- |
+| 12 | Model: a step counts from the sprint's first or last day, before or after it; the timeline starts at its earliest bar. | Done 2026-11-08, 5 tests |
+| 13 | Where today falls: a step that runs during development is named with it, and a step before the sprint is named as the next thing to start. | Done 2026-11-08, 3 tests |
+| 14 | Drawing: a step that starts before development is drawn above it, in the chart and the table. | Done 2026-11-08, 2 tests; the local preview shows a whole cycle in light and dark |
+| 15 | Step form: a count, before or after, and the sprint's first or last day. | Done 2026-11-08, 3 tests |
+| 16 | Test as a private copy in the sandbox organization: a step before the sprint draws, saves and reads back. | Open |
+| 17 | Publish 1.1.0, check it in the first consuming organization, and save the cycle there for the teams Scott names. | Open |
 
 ## Open questions that only a live test answers
 
