@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: complete
 type: plan
 scope: M
 created: 2026-11-08
@@ -52,7 +52,7 @@ A step now counts its working days before or after either the sprint's first day
 | 14 | Drawing: a step that starts before development is drawn above it, in the chart and the table. | Done 2026-11-08, 2 tests; the local preview shows a whole cycle in light and dark |
 | 15 | Step form: a count, before or after, and the sprint's first or last day. | Done 2026-11-08, 3 tests |
 | 16 | Test as a private copy in the sandbox organization: a step before the sprint draws, saves and reads back. | Done 2026-11-08 in a browser signed in as the sandbox owner: the private copy 1.1.0 draws the default steps as 1.0 does; a step 3 working days before the sprint's first day, lasting 7, saved on the first press and drew Wed 11/4 to Thu 11/12 above development, with "Today is day 3 of 7 of Planning"; it read back the same after a reload |
-| 17 | Publish 1.1.0, check it in the first consuming organization, and save the cycle there for the teams Scott names. | Open |
+| 17 | Publish 1.1.0, check it in the first consuming organization, and save the cycle there for the teams Scott names. | Done 2026-11-08: 1.1.0 published and validated; the first consuming organization updated to it on its own the same minute. The cycle is saved for the four teams Scott named, read back from storage, and shows live on one team's next sprint: Planning Wed 11/4 to Thu 11/12, development, UAT, release, close-out, release notes and the retrospective on Fri 11/27 |
 
 ## Open questions that only a live test answers
 
